@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 
+// Input a matrix
 void input(int matrix[10][10], int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
@@ -8,6 +10,7 @@ void input(int matrix[10][10], int rows, int cols) {
     }
 }
 
+// Print a matrix
 void print(int matrix[10][10], int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
@@ -17,50 +20,38 @@ void print(int matrix[10][10], int rows, int cols) {
     }
 }
 
-// cofactor 
-void cofactor(int mat[10][10], int temp[10][10], int p, int q, int n) {
-    int i = 0, j = 0;
-    for (int row = 0; row < n; row++) {
-        for (int col = 0; col < n; col++) {
-            if (row != p && col != q) {
-                temp[i][j] = mat[row][col];
-                j++;
-                if (j == n - 1) {
-                    j = 0;
-                    i++;
-                }
-            }
-        }
-    }
-}
-
-// determinant
+// Calculate the determinant of a matrix
 int determinant(int mat[10][10], int n) {
     if (n == 1) {
         return mat[0][0];
     }
-    int temp[10][10];
+    if (n == 2) {
+        return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
+    }
+
     int det = 0;
+    int temp[10][10]; // Submatrix
     int sign = 1;
 
     for (int f = 0; f < n; f++) {
-        cofactor(mat, temp, 0, f, n);
+        // Create submatrix for the current element
+        int sub_i = 0;
+        for (int i = 1; i < n; i++) {
+            int sub_j = 0;
+            for (int j = 0; j < n; j++) {
+                if (j != f) {
+                    temp[sub_i][sub_j++] = mat[i][j];
+                }
+            }
+            sub_i++;
+        }
         det += sign * mat[0][f] * determinant(temp, n - 1);
         sign = -sign;
     }
     return det;
 }
 
-// transpose
-void transpose(int n, int matrix[10][10], int result[10][10]) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            result[j][i] = matrix[i][j];
-        }
-    }
-}
-
-// adjoint
+// Find the adjoint of a matrix
 void adjoint(int mat[10][10], int adj[10][10], int n) {
     if (n == 1) {
         adj[0][0] = 1;
@@ -68,19 +59,33 @@ void adjoint(int mat[10][10], int adj[10][10], int n) {
     }
 
     int temp[10][10];
-    int sign = 1;
+    int sign;
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            cofactor(mat, temp, i, j, n);
-            int det = determinant(temp, n - 1);
+            // Create submatrix for the current element
+            int sub_i = 0;
+            for (int row = 0; row < n; row++) {
+                if (row == i) {
+                    continue;
+                }
+                int sub_j = 0;
+                for (int col = 0; col < n; col++) {
+                    if (col == j) {
+                        continue;
+                    }
+                    temp[sub_i][sub_j++] = mat[row][col];
+                }
+                sub_i++;
+            }
+
             sign = ((i + j) % 2 == 0) ? 1 : -1;
-            adj[j][i] = sign * det;  // 
+            adj[j][i] = sign * determinant(temp, n - 1); // Transpose in-place
         }
     }
 }
 
-// inverse ...
+// Find the inverse of a matrix
 void inverse(int mat[10][10], int n) {
     int det = determinant(mat, n);
     if (det == 0) {
@@ -100,7 +105,7 @@ void inverse(int mat[10][10], int n) {
     }
 }
 
-// add and subtract
+// Add or subtract two matrices
 void addsubtract(int matA[10][10], int matB[10][10], int result[10][10], int rows, int cols, int isAddition) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
@@ -109,7 +114,7 @@ void addsubtract(int matA[10][10], int matB[10][10], int result[10][10], int row
     }
 }
 
-// Multiply
+// Multiply two matrices
 void multiply(int first[10][10], int second[10][10], int result[10][10], int row1, int col1, int col2) {
     for (int i = 0; i < row1; i++) {
         for (int j = 0; j < col2; j++) {
@@ -121,7 +126,7 @@ void multiply(int first[10][10], int second[10][10], int result[10][10], int row
     }
 }
 
-// trace
+// Calculate the trace of a matrix
 int trace(int matrix[10][10], int n) {
     int trace = 0;
     for (int i = 0; i < n; i++) {
@@ -130,6 +135,7 @@ int trace(int matrix[10][10], int n) {
     return trace;
 }
 
+// Main function
 int main() {
     int choice;
     printf("Matrix Calculator:\n");
@@ -197,4 +203,3 @@ int main() {
     }
     return 0;
 }
-//
