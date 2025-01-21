@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-void input(int matrix[10][10], int rows, int cols) { // INPUT
+void input(int matrix[10][10], int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             scanf("%d", &matrix[i][j]);
@@ -9,7 +8,7 @@ void input(int matrix[10][10], int rows, int cols) { // INPUT
     }
 }
 
-void print(int matrix[10][10], int rows, int cols) { // PRINTING
+void print(int matrix[10][10], int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             printf("%d ", matrix[i][j]);
@@ -18,64 +17,42 @@ void print(int matrix[10][10], int rows, int cols) { // PRINTING
     }
 }
 
-int determinant(int mat[10][10], int n) { // DETERMINANT
-    if (n == 1)
-        return mat[0][0];
-    int temp[10][10];
-    int det = 0;
-    int sign = 1;
-    for (int f = 0; f < n; f++) {
-        // Creating minor matrix
-        int minorRow = 0, minorCol = 0;
-        for (int i = 1; i < n; i++) { 
-            for (int j = 0; j < n; j++) {
-                if (j != f) { // 
-                    temp[minorRow][minorCol++] = mat[i][j];
-                    if (minorCol == n - 1) {
-                        minorCol = 0;
-                        minorRow++;
-                    }
+// cofactor .....
+void cofactor(int mat[10][10], int temp[10][10], int p, int q, int n) {
+    int i = 0, j = 0;
+    for (int row = 0; row < n; row++) {
+        for (int col = 0; col < n; col++) {
+            if (row != p && col != q) {
+                temp[i][j] = mat[row][col];
+                j++;
+                if (j == n - 1) {
+                    j = 0;
+                    i++;
                 }
             }
         }
+    }
+}
+
+// determinantttt
+int determinant(int mat[10][10], int n) {
+    if (n == 1) {
+        return mat[0][0];
+    }
+    int temp[10][10];
+    int det = 0;
+    int sign = 1;
+
+    for (int f = 0; f < n; f++) {
+        cofactor(mat, temp, 0, f, n);
         det += sign * mat[0][f] * determinant(temp, n - 1);
         sign = -sign;
     }
     return det;
 }
 
-void findCofactor(int n, int matrix[10][10], int cofactor[10][10]) { // COFACTOR
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            int minor[10][10];
-            int minorRow = 0, minorCol = 0;
-
-            for (int x = 0; x < n; x++) {
-                for (int y = 0; y < n; y++) {
-                    if (x != i && y != j) {
-                        minor[minorRow][minorCol] = matrix[x][y];
-                        minorCol++;
-                        if (minorCol == n - 1) {
-                            minorCol = 0;
-                            minorRow++;
-                        }
-                    }
-                }
-            }
-
-            // det of minor
-            int determinant = (minor[0][0] * minor[1][1]) - (minor[0][1] * minor[1][0]);
-
-            if ((i + j) % 2 == 0) {
-                cofactor[i][j] = determinant;
-            } else {
-                cofactor[i][j] = -determinant;
-            }
-        }
-    }
-}
-
-void transpose(int n, int matrix[10][10], int result[10][10]) { // TRANSPOSE
+// transpose uhh ezzzyy
+void transpose(int n, int matrix[10][10], int result[10][10]) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             result[j][i] = matrix[i][j];
@@ -83,20 +60,37 @@ void transpose(int n, int matrix[10][10], int result[10][10]) { // TRANSPOSE
     }
 }
 
-void computeAdjoint(int n, int mat[10][10], int adj[10][10]) { // ADJOINT
-    int cofactor[10][10];
-    findCofactor(n, mat, cofactor);
-    transpose(n, cofactor, adj);
+// adjointttt
+void adjoint(int mat[10][10], int adj[10][10], int n) {
+    if (n == 1) {
+        adj[0][0] = 1;
+        return;
+    }
+
+    int temp[10][10];
+    int sign = 1;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cofactor(mat, temp, i, j, n);
+            int det = determinant(temp, n - 1);
+            sign = ((i + j) % 2 == 0) ? 1 : -1;
+            adj[j][i] = sign * det;  // idk
+        }
+    }
 }
 
-void inverse(int mat[10][10], int n) { // INVERSE
+// inverse .... ig
+void inverse(int mat[10][10], int n) {
     int det = determinant(mat, n);
     if (det == 0) {
         printf("The matrix is singular and cannot have an inverse.\n");
         return;
     }
+
     int adj[10][10];
-    computeAdjoint(n, mat, adj);
+    adjoint(mat, adj, n);
+
     printf("The inverse of the matrix is:\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -106,7 +100,8 @@ void inverse(int mat[10][10], int n) { // INVERSE
     }
 }
 
-void addsubtract(int matA[10][10], int matB[10][10], int result[10][10], int rows, int cols, int isAddition) { // ADD/SUB
+// add and subtract
+void addsubtract(int matA[10][10], int matB[10][10], int result[10][10], int rows, int cols, int isAddition) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             result[i][j] = isAddition ? matA[i][j] + matB[i][j] : matA[i][j] - matB[i][j];
@@ -114,7 +109,8 @@ void addsubtract(int matA[10][10], int matB[10][10], int result[10][10], int row
     }
 }
 
-void multiply(int first[10][10], int second[10][10], int result[10][10], int row1, int col1, int col2) { // MULTIPLY
+// Multiply
+void multiply(int first[10][10], int second[10][10], int result[10][10], int row1, int col1, int col2) {
     for (int i = 0; i < row1; i++) {
         for (int j = 0; j < col2; j++) {
             result[i][j] = 0;
@@ -125,7 +121,8 @@ void multiply(int first[10][10], int second[10][10], int result[10][10], int row
     }
 }
 
-int trace(int matrix[10][10], int n) { // TRACE
+// trace ehe
+int trace(int matrix[10][10], int n) {
     int trace = 0;
     for (int i = 0; i < n; i++) {
         trace += matrix[i][i];
@@ -157,7 +154,7 @@ int main() {
             printf("\nDeterminant: %d\n", determinant(mat, n));
         } else if (choice == 2) {
             int adj[10][10];
-            computeAdjoint(n, mat, adj);
+            adjoint(mat, adj, n);
             printf("\nAdjoint of the matrix:\n");
             print(adj, n, n);
         } else if (choice == 3) {
@@ -200,3 +197,4 @@ int main() {
     }
     return 0;
 }
+//finalised?
